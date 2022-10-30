@@ -13,6 +13,7 @@ const findMetaMaskAccount = async () =>{
 
     const accounts = await ethereum.request({method: "eth_accounts"});
     if (accounts.length !== 0) {
+      console.log('Accounts in Find MetaMask: ', accounts);
       const account = accounts[0];
       return account;
     } else {
@@ -37,7 +38,7 @@ export default function App() {
         alert('Please get MetaMask');
       }
       const accounts = await ethereum.request({
-        method:"eth_accounts"
+        method:"eth_requestAccounts"
       });
 
       console.log('Found account: ', accounts[0]);
