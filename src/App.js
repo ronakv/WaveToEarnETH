@@ -56,6 +56,7 @@ export default function App() {
 
   const getAllWaves = async () => {
     try {
+      console.log('----In get all waves ------')
       const { ethereum } = window;
       if (ethereum) {
         const provider = new ethers.providers.Web3Provider(ethereum);
@@ -66,7 +67,7 @@ export default function App() {
          * Call the getAllWaves method from your Smart Contract
          */
         const waves = await wavePortalContract.getAllWaves();
-
+        console.log('Waves : ', waves);
 
         /*
          * We only need address, timestamp, and message in our UI so let's
