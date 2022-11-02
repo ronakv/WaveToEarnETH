@@ -29,7 +29,8 @@ const findMetaMaskAccount = async () =>{
 }
 export default function App() {
   const [currentAccount, setCurrentAccount] = useState("");
-  const contractAddress = "0x588E2e5459094938fd133B4Cab7079a068CD7Bb9";
+  const [allWaves, setAllWaves] = useState([]);
+  const contractAddress = "0x5A6C7C23d096fF7DA3983508393693fa16f13D1F";
   const contractABI = abi.abi;
 
   const connectWallet = async () =>{
@@ -45,9 +46,50 @@ export default function App() {
       console.log('Found account: ', accounts[0]);
       setCurrentAccount(accounts[0]);
       console.log('Connected')
+
+
     }
     catch(error){
       console.error(error);
+    }
+  }
+
+  const getAllWaves = async () => {
+    try {
+      const { ethereum } = window;
+      if (ethereum) {
+        const provider = new ethers.providers.Web3Provider(ethereum);
+        const signer = provider.getSigner();
+        const wavePortalContract = new ethers.Contract(contractAddress, contractABI, signer);
+
+        /*
+         * Call the getAllWaves method from your Smart Contract
+         */
+        const waves = await wavePortalContract.getAllWaves();
+
+
+        /*
+         * We only need address, timestamp, and message in our UI so let's
+         * pick those out
+         */
+        let wavesCleaned = [];
+        waves.forEach(wave => {
+          wavesCleaned.push({
+            address: wave.waver,
+            timestamp: new Date(wave.timestamp * 1000),
+            message: wave.message
+          });
+        });
+
+        /*
+         * Store our data in React State
+         */
+        setAllWaves(wavesCleaned);
+      } else {
+        console.log("Ethereum object doesn't exist!")
+      }
+    } catch (error) {
+      console.log(error);
     }
   }
 
@@ -62,7 +104,7 @@ export default function App() {
         let count = await wavePortalContract.getTotalWaves();
         console.log("Retrieved Total Wave Count: ", count.toNumber());
 
-        const waveTxn = await wavePortalContract.wave();
+        const waveTxn = await wavePortalContract.wave("Trying to wave");
         console.log("Mining....", waveTxn.hash);
 
         await waveTxn.wait();
@@ -90,6 +132,7 @@ export default function App() {
       const account = await findMetaMaskAccount();
       if(account!==null){
         setCurrentAccount(account);
+        await getAllWaves();
       }
     }
   }, []);
@@ -114,6 +157,14 @@ export default function App() {
               Connect Wallet
             </button>
         )}
+        {allWaves.map((wave, index) => {
+          return (
+              <div key={index} style={{ backgroundColor: "OldLace", marginTop: "16px", padding: "8px" }}>
+                <div>Address: {wave.address}</div>
+                <div>Time: {wave.timestamp.toString()}</div>
+                <div>Message: {wave.message}</div>
+              </div>)
+        })}
       </div>
     </div>
   );
